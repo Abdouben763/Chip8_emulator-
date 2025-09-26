@@ -1,6 +1,7 @@
 #include "display.h"
 #include "chip8.h"
 #include "input.h"
+#include "timer.h"
 
 int main(int argc, char const *argv[]) {
     // usage
@@ -25,9 +26,20 @@ int main(int argc, char const *argv[]) {
     {
         handle_input(&chip8) ; 
         if (chip8.state == PAUSED) continue ;
-        run_intructions(&chip8) ;
-        SDL_Delay(16);  // ~60Hz
+
+        // Get time before executing instructions
+        uint32_t start_time = SDL_GetPerformanceCounter ();
+        for( uint32_t i = 0 ; i < instructions_per_second / 60 ; i++ ) {
+            run_intructions(&chip8) ;
+        }
+        // Get time after executing instructions
+        uint32_t end_time = SDL_GetPerformanceCounter () ;
+        // Calculate elapsed time in milliseconds
+        double elapsed_time = (double) ( end_time - start_time) *1000 / SDL_GetPerformanceFrequency() ;
+
+        SDL_Delay(16.67 - elapsed_time);  // ~60Hz
         update_display(&sdl , &chip8 ) ;
+        update_timers(&chip8) ;
     }
     
     clear_display(&sdl) ;

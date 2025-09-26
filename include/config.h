@@ -10,6 +10,7 @@
 #define FG_color 0xFFFFFFFF
 #define BG_color 0x000000FF
 #define pixelized true
+#define instructions_per_second 500
 
 
 
