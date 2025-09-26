@@ -263,12 +263,25 @@ void run_intructions ( chip8_t *chip8 ) {
                 break;
             case 0x0A : 
                 // 0xFX0A: Wait for a key press, store the value of the key in VX
-                //bool key_pressed = false;
-                
+                bool key_pressed = false;
+                for ( uint8_t i = 0 ; i < sizeof(chip8->keypad) ; i++ ) { 
+                    if ( chip8->keypad[i]) { 
+                        chip8->V[chip8->inst.X] = i ; 
+                        key_pressed = true ;
+                        break ; 
+                    }
+                }
+                if (!key_pressed) {
+                    chip8->pc -= 2 ; // repeat this instruction
+                }
                 break ; 
             case 0x15 : // timer 
+                // 0xFX15: Set the delay timer to VX
+                chip8->delay_timer = chip8->V[chip8->inst.X ] ;
                 break;
             case 0x18 : // sound 
+                // 0xFX18: Set the sound timer to VX
+                chip8->sound_timer = chip8->V[chip8->inst.X ] ;
                 break;
             case 0x1E : // adds vx to I 
                 chip8->I += chip8->V[chip8->inst.X ];
