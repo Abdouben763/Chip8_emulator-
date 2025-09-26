@@ -1,0 +1,40 @@
+# Compiled object files
+*.o
+*.obj
+
+# Compiled binary / executable
+*.out
+*.exe
+*.elf
+
+# Libraries
+*.a
+*.so
+*.dll
+*.dylib
+
+# Debug files
+*.dSYM/
+*.stackdump
+*.core
+*.pch
+
+# Build directories (e.g. make or cmake output)
+build/
+bin/
+dist/
+
+# Editor / IDE junk
+*.swp
+*.swo
+*.tmp
+*~
+.vscode/
+.idea/
+
+# Logs
+*.log
+
+# OS-specific files
+.DS_Store
+Thumbs.db
