@@ -4,14 +4,24 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-#define window_width 640
-#define window_height 320
-#define scale_factor 10
-#define FG_color 0xFFFFFFFF
-#define BG_color 0x000000FF
-#define pixelized true
-#define instructions_per_second 500
 
+
+typedef struct {
+    uint32_t window_width;
+    uint32_t window_height;
+    uint32_t scale_factor;
+    uint32_t fg_color;
+    uint32_t bg_color;
+    bool pixelized;
+    uint32_t instructions_per_second;
+    // audio settings
+    uint32_t sqr_freq; // Frequency in Hz
+    int16_t volume; // Volume (0-128)
+    uint32_t sample_rate; // Audio sample rate
+
+} config_t;
+
+bool init_config (config_t *config) ; 
 
 
 #endif // CONFIG_H
