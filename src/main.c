@@ -39,7 +39,7 @@ int main(int argc, char const *argv[]) {
 
     // Clear screen and show controls
     clear_display(&sdl , config) ;
-    puts("Press Space to pause/resume, M to reset, ESC to quit") ;
+    puts("Press Space to pause/resume, M to reset, ESC to quit, F1-F4 to save state, F5-F8 to load state") ;
     
     // Main emulation loop - runs at 60 FPS
     while (chip8.state != STOPPED)
