@@ -43,7 +43,7 @@ pacman -S mingw-w64-x86_64-SDL2 mingw-w64-x86_64-gcc make
 ### Build & Run
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/chip8-emulator.git
+git clone https://github.com/Abdouben763/chip8_emulator.git
 cd chip8-emulator
 
 # Build the emulator
