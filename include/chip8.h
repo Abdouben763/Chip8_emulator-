@@ -31,9 +31,6 @@ typedef struct {
     uint8_t Y ;  
 } instruction_t  ; 
 
-
-
-
 typedef struct { 
     bool  display[CHIP8_DISPLAY_WIDTH * CHIP8_DISPLAY_HEIGHT]; // 64x32 pixel monochrome display
     bool keypad[16];        // Hexadecimal keypad 0x0-0xF
@@ -49,12 +46,15 @@ typedef struct {
     state_t state;
     const char *rom_name;
     instruction_t inst;
+    char rom_name_copy[256];
+    char save_filename[300];
  
-    bool draw;
 } chip8_t;
 
 
 bool init_chip8(chip8_t *chip8 ,const char rom_name[]) ; 
 void run_intructions ( chip8_t *chip8 ) ; 
+bool save_state ( chip8_t *chip8 , char *save_file ,size_t save_file_size , int slot) ;
+bool load_state ( chip8_t *chip8 , char *save_file , size_t save_file_size , int slot ) ;
 
 #endif // CHIP8_H

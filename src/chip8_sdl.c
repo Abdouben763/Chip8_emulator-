@@ -1,19 +1,31 @@
-
-#include "display.h"
+/** 
+ * @file display.c
+ * @brief SDL2 Display and Audio Handling for CHIP-8 Emulator
+ * @author Abderrahmane Benchikh
+ * @date 2025
+ * 
+ * This file implements the display and audio functionalities using SDL2.
+ * It includes initialization, rendering the CHIP-8 display, clearing the
+ * screen, and audio callback for sound generation.
+ */
+#include "chip8_sdl.h"
 
 
 void audio_callback(void *userdata, uint8_t *stream, int len) {
     config_t *config = (config_t *)userdata;
     int16_t *data = (int16_t *)stream;
     static uint32_t sample_counter = 0 ; 
-
     const int32_t sqr_wave_T = config->sample_rate / config->sqr_freq;
     int32_t half_sqr_wave_T = sqr_wave_T / 2;
    
 
     for (int i = 0; i < len / 2; i++) {
-        data[i] = ((sample_counter++ / half_sqr_wave_T) % 2) ? 
-                   config->volume : -config->volume;
+        if ( (sample_counter / half_sqr_wave_T) %2 ) {
+            data[i] = config->volume ; // High part of the square wave
+        } else {
+            data[i] = -config->volume ; // Low part of the square wave
+        }
+        sample_counter++ ;
     }
 }
 

@@ -1,9 +1,22 @@
+/**
+ * @file chip8.c
+ * @brief CHIP-8 Emulator Core Implementation
+ * @author Abderrahmane Benchikh
+ * @date 2025
+ * 
+ * This file contains the core implementation of the CHIP-8 emulator,
+ * including initialization, instruction execution, and state saving/loading.
+ * It adheres to the C17 standard and uses SDL2 for logging.
+ */
+
+
 #include "chip8.h"
 
-
+// Initialize CHIP-8 system and load ROM
 bool init_chip8 (chip8_t *chip8 , const char rom_name[]) {
     const uint32_t entry_point = 0x200 ; 
      
+    // Built-in hexadecimal font set (0-F), each character is 4x5 pixels
     const uint8_t font[] = {
         0xF0, 0x90, 0x90, 0x90, 0xF0, // 0
         0x20, 0x60, 0x20, 0x20, 0x70, // 1
@@ -22,29 +35,34 @@ bool init_chip8 (chip8_t *chip8 , const char rom_name[]) {
         0xF0, 0x80, 0xF0, 0x80, 0xF0, // E
         0xF0, 0x80, 0xF0, 0x80, 0x80  // F
     } ;
-    // load fonts 
+    // Clear all memory and registers
+    memset ( chip8 , 0 , sizeof ( chip8_t ) ) ;
+    // Load font set into memory (0x50-0x9F)
     memcpy (&chip8->memory[0], font , sizeof(font )) ; 
     
-     // load Rom 
-     FILE *rom = fopen(rom_name , "rb") ; 
+    // Open ROM file
+    FILE *rom = fopen(rom_name , "rb") ; 
      if (!rom) { 
         SDL_Log ("Rom file %s is invalid\n" ,rom_name ) ; 
             return false   ;
      }
-     // rom size 
-     fseek ( rom , 0 , SEEK_END) ; 
-     const size_t rom_size = ftell(rom) ; 
-     const size_t max_size = sizeof ( chip8->memory ) - entry_point ; 
-     rewind(rom) ; 
+    // Get ROM size and validate it fits in memory
+    fseek ( rom , 0 , SEEK_END) ; 
+    const size_t rom_size = ftell(rom) ; 
+    const size_t max_size = sizeof ( chip8->memory ) - entry_point ; 
+    rewind(rom) ; 
 
-     if (rom_size > max_size) {
+    if (rom_size > max_size) {
         SDL_Log("Rom file %s size is too big, rom size : %zu, max size : %zu\n " , rom_name , rom_size , max_size) ; 
+        fclose(rom);
         return false ; 
-        
-     }
-     if (fread(&chip8->memory[entry_point], rom_size , 1 , rom )!= 1) {
+    }
+    // Load ROM into memory starting at 0x200
+    if (fread(&chip8->memory[entry_point], rom_size , 1 , rom )!= 1) {
         SDL_Log ("Could not read rom %s \n" , rom_name) ; 
-     } 
+        fclose(rom);
+        return false;
+    } 
 
 
      fclose(rom) ;
@@ -60,7 +78,60 @@ bool init_chip8 (chip8_t *chip8 , const char rom_name[]) {
 
     return true  ; 
 }
+// Generate save filename based on ROM name and slot number
+static void prepare_save_filename(chip8_t *chip8, char *save_file, size_t save_file_size, int slot) {
+    // Copy ROM name to working buffer
+    strncpy(chip8->rom_name_copy, chip8->rom_name, sizeof(chip8->rom_name_copy) - 1);
+    chip8->rom_name_copy[sizeof(chip8->rom_name_copy) - 1] = '\0';
 
+    // Remove file extension if present
+    char *dot = strrchr(chip8->rom_name_copy, '.');
+    if (dot) *dot = '\0';
+
+    // Create filename: "romname_slotN.bin"
+    snprintf(save_file, save_file_size, "%s_slot%d.bin", chip8->rom_name_copy, slot);
+}
+
+// Save current CHIP-8 state to file
+bool save_state ( chip8_t *chip8 , char *save_file,size_t save_file_size ,  int slot ) { 
+    prepare_save_filename(chip8, save_file, save_file_size, slot);
+
+    FILE *file = fopen(save_file , "wb") ; 
+    if (!file) { 
+        SDL_Log("Could not open file %s for writing\n" , save_file) ;
+        return false ; 
+    }
+    // Write entire system state as binary data
+    if ( fwrite ( chip8 , sizeof ( chip8_t ) , 1 , file) != 1 ) { 
+        SDL_Log ("Could not write to file %s\n" , save_file) ; 
+        fclose(file) ; 
+        return false ; 
+    }
+
+    fclose(file) ;
+    return true ;
+}
+
+
+
+// Load CHIP-8 state from save file
+bool load_state ( chip8_t *chip8 ,  char *save_file , size_t save_file_size , int slot ) { 
+    prepare_save_filename(chip8, save_file, save_file_size, slot);
+
+    FILE *file = fopen(save_file , "rb") ; 
+    if (!file) { 
+        SDL_Log("Could not open file %s for reading\n" , save_file) ;
+        return false ; 
+    }
+    // Load entire system state from binary data
+    if ( fread ( chip8 , sizeof ( chip8_t ) , 1 , file) != 1 ) { 
+        SDL_Log ("Could not read from file %s\n" , save_file) ; 
+        fclose(file) ; 
+        return false ; 
+    }
+    fclose(file) ;
+    return true ;
+}
 
 void run_intructions ( chip8_t *chip8 ) { 
     bool carry ;
@@ -130,7 +201,7 @@ void run_intructions ( chip8_t *chip8 ) {
             chip8->V[chip8->inst.X] += chip8->inst.NN ; 
             break;
             
-        case 0X08 :
+        case 0x08 :
             switch (chip8->inst.N) 
             {
                 case 0x00:
@@ -233,12 +304,11 @@ void run_intructions ( chip8_t *chip8 ) {
                     }
                 }
             }
-            chip8->draw = true ;
             break;
 
         case 0x0E :
             if(chip8->inst.NN == 0x9E) { 
-                // TODO : key pressing 
+                // key pressing 
                 if (chip8->keypad[chip8->V[chip8->inst.X]]) { 
                     chip8->pc += 2 ;
                 }
@@ -317,8 +387,5 @@ void run_intructions ( chip8_t *chip8 ) {
         default :   
             break;
     }
-
-    // emulate instructions : 
-    
 
 }

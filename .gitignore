@@ -1,13 +1,25 @@
+# ================================================================
+# CHIP-8 Emulator .gitignore
+# ================================================================
+
+# Project-specific executable
+chip8
+chip8.exe
+
 # Compiled object files
 *.o
 *.obj
 
-# Compiled binary / executable
-*.out
-*.exe
-*.elf
+# Build directories
+obj/
+build/
+bin/
+dist/
 
-# Libraries
+# Save states (binary files from emulator)
+*.bin
+
+# Compiled libraries
 *.a
 *.so
 *.dll
@@ -19,22 +31,23 @@
 *.core
 *.pch
 
-# Build directories (e.g. make or cmake output)
-build/
-bin/
-dist/
-
-# Editor / IDE junk
+# Editor / IDE files
 *.swp
 *.swo
 *.tmp
 *~
 .vscode/
 .idea/
+*.sublime-*
 
-# Logs
+# Logs and temporary files
 *.log
+*.bak
 
 # OS-specific files
 .DS_Store
 Thumbs.db
+ehthumbs.db
+
+# Compilation database (for IDEs)
+compile_commands.json

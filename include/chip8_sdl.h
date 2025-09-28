@@ -1,5 +1,5 @@
-#ifndef DISPLAY_H
-#define DISPLAY_H
+#ifndef CHIP8_SDL_H
+#define CHIP8_SDL_H
 
 #include <stdint.h>
 #include <SDL2/SDL.h>
@@ -22,4 +22,4 @@ void update_display ( sdl_t *sdl , chip8_t *chip8 , config_t config ) ;
 void audio_callback ( void *userdata , uint8_t * stream , int len ) ;
 
 
-#endif // DISPLAY_H
+#endif // chip8_SDL_H
